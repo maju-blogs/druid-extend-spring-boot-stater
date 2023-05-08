@@ -20,6 +20,7 @@ public interface RedisDruidCache {
 
     List<String>  getSqlByServerName(String serverName);
 
-    List<String>  getWebUriByServerName(String serverName);
+    String  getWebUriByServerName(String serverName);
 
+    String getRecentSqlByServerName(String serverName);
 }

@@ -60,8 +60,20 @@ public class RedisDruidCacheImpl implements RedisDruidCache {
     }
 
     @Override
-    public List<String> getWebUriByServerName(String serverName) {
-        List<String> range = redisTemplate.opsForList().range(RedisDruidCache.SERVER_DATA + serverName + ":URI", 0, -1);
-        return range;
+    public String getWebUriByServerName(String serverName) {
+        Object range = redisTemplate.opsForList().index(RedisDruidCache.SERVER_DATA + serverName + ":URI", -1);
+        if(null != range){
+            return range.toString();
+        }
+        return null;
+    }
+
+    @Override
+    public String getRecentSqlByServerName(String serverName) {
+        Object range = redisTemplate.opsForList().index(RedisDruidCache.SERVER_DATA + serverName + ":SQL", -1);
+        if(null != range){
+            return range.toString();
+        }
+        return null;
     }
 }

@@ -29,6 +29,13 @@ public class DruidController {
     }
 
     @ResponseBody
+    @RequestMapping("recentSql")
+    public ResponseEntity<String> recentSql(String serverName) {
+        String sql = redisDruidCacheConfig.getRedisDruidCache().getRecentSqlByServerName(serverName);
+        return ResponseEntity.ok(sql);
+    }
+
+    @ResponseBody
     @RequestMapping("clearAll")
     public ResponseEntity<String> clearAll() {
         redisDruidCacheConfig.getRedisDruidCache().clearAll();
@@ -37,8 +44,8 @@ public class DruidController {
 
     @ResponseBody
     @RequestMapping("webUrl")
-    public ResponseEntity<List<String>> webUrl(String serverName) {
-        List<String> web = redisDruidCacheConfig.getRedisDruidCache().getWebUriByServerName(serverName);
+    public ResponseEntity<String> webUrl(String serverName) {
+        String web = redisDruidCacheConfig.getRedisDruidCache().getWebUriByServerName(serverName);
         return ResponseEntity.ok(web);
     }
 
