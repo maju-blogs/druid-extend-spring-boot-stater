@@ -2,6 +2,7 @@ package com.alibaba.druid.extend.web;
 
 import com.alibaba.druid.extend.config.RedisDruidCacheConfig;
 import com.alibaba.druid.extend.properties.ServerInfoProperties;
+import com.alibaba.druid.extend.properties.SqlDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -23,8 +24,8 @@ public class DruidController {
 
     @ResponseBody
     @RequestMapping("sql")
-    public ResponseEntity<List<String>> getSql(String serverName) {
-        List<String> sql = redisDruidCacheConfig.getRedisDruidCache().getSqlByServerName(serverName);
+    public ResponseEntity<List<SqlDto>> getSql(String serverName) {
+        List<SqlDto> sql = redisDruidCacheConfig.getRedisDruidCache().getSqlByServerName(serverName);
         return ResponseEntity.ok(sql);
     }
 

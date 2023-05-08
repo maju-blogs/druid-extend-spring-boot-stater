@@ -1,18 +1,22 @@
 package com.alibaba.druid.extend.config;
 
 import com.alibaba.druid.extend.properties.ServerInfoProperties;
+import com.alibaba.druid.extend.properties.SqlDto;
 import com.alibaba.druid.pool.DruidDataSourceStatLogger;
 import com.alibaba.druid.pool.DruidDataSourceStatLoggerImpl;
 import com.alibaba.druid.pool.DruidDataSourceStatValue;
 import com.alibaba.druid.stat.DruidStatService;
 import com.alibaba.druid.stat.JdbcSqlStatValue;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.DigestUtils;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -27,8 +31,7 @@ public class DruidExtendStatLogger extends DruidDataSourceStatLoggerImpl impleme
 
     private Date lastClearDate = new Date();
 
-    private long clear = 24 * 60* 60 *1000;
-
+    private long clear = 24 * 60 * 60 * 1000;
 
     @Override
     public void log(DruidDataSourceStatValue statValue) {
@@ -45,8 +48,26 @@ public class DruidExtendStatLogger extends DruidDataSourceStatLoggerImpl impleme
                 String weburi = druidStatService.service("/weburi.json");
                 log.debug("DRUID_SQL_STAT_LOGGER:APP:{},{}", appName, jdbcSqlStatValueStream);
                 log.debug("DRUID_URI_STAT_LOGGER:APP:{},{}", appName, weburi);
+                JSONArray array = new JSONArray();
+                for (JdbcSqlStatValue value : jdbcSqlStatValueStream) {
+                    SqlDto dto = new SqlDto();
+                    dto.setId(value.getId());
+                    dto.setSql(value.getSql());
+                    dto.setSqlMD5(DigestUtils.md5DigestAsHex(value.getSql().getBytes()));
+                    dto.setExecuteCount(value.getExecuteCount());
+                    dto.setExecuteMillisTotal(value.getExecuteMillisTotal());
+                    dto.setExecuteMillisMax(value.getExecuteMillisMax());
+                    dto.setInTransactionCount(value.getInTransactionCount());
+                    dto.setExecuteErrorCount(value.getExecuteErrorCount());
+                    dto.setUpdateCount(value.getUpdateCount());
+                    dto.setFetchRowCount(value.getFetchRowCount());
+                    dto.setRunningCount(value.getRunningCount());
+                    dto.setConcurrentMax(value.getConcurrentMax());
+                    array.add(dto);
+                }
+
                 if (null != serverInfoProperties.getRedisDruidCache()) {
-                    serverInfoProperties.getRedisDruidCache().putLogger(appName + ":SQL", JSON.toJSONString(jdbcSqlStatValueStream,SerializerFeature.DisableCircularReferenceDetect));
+                    serverInfoProperties.getRedisDruidCache().putLogger(appName + ":SQL", JSON.toJSONString(array));
                     serverInfoProperties.getRedisDruidCache().putLogger(appName + ":URI", weburi);
                     if (null == infoProperties) {
                         infoProperties = new ServerInfoProperties();

@@ -1,6 +1,7 @@
 package com.alibaba.druid.extend.config;
 
 import com.alibaba.druid.extend.properties.ServerInfoProperties;
+import com.alibaba.druid.extend.properties.SqlDto;
 
 import java.util.List;
 
@@ -18,7 +19,7 @@ public interface RedisDruidCache {
 
     void clearAll();
 
-    List<String>  getSqlByServerName(String serverName);
+    List<SqlDto>  getSqlByServerName(String serverName);
 
     String  getWebUriByServerName(String serverName);
 

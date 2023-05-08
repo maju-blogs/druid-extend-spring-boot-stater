@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>druid-extend</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="./layui/css/layui.css" rel="stylesheet">
+</head>
+<body>
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header layui-bg-gray">
+        <div class="layui-logo layui-hide-xs" style="color :#1e9fff">druid-extend</div>
+        <div class="layui-layout-left">
+            <div class="layui-form-item">
+                <label class="layui-form-label">服务名：</label>
+                <label id="name" style="color :#1e9fff" class="layui-form-label"></label>
+                <label class="layui-form-label">druid地址：</label>
+                <label class="layui-form-label"><a style="color :#1e9fff" id="address"></a></label>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-side layui-bg-gray">
+        <div class="layui-side-scroll layui-bg-gray">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <div class="layui-panel" style="width: 200px; margin: 1px;">
+                <ul class="layui-menu" id="demo-menu">
+                    <li class="layui-menu-item-group  layui-menu-item-down" lay-options="{type: 'group'}">
+                        <div class="layui-menu-body-title">
+                            服务名称 <i class="layui-icon"></i>
+                        </div>
+                        <ul id="sql">
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="layui-body">
+        <!-- 内容主体区域 -->
+        <div style="padding: 15px;">
+            <blockquote class="layui-elem-quote layui-text">
+                插件基于redis实现，需要配置spring redis连接方式以及RedisTemplate
+            </blockquote>
+            <div class="layui-card layui-panel">
+                <div class="layui-tab" lay-filter="filter">
+                    <ul class="layui-tab-title">
+                        <li class="layui-this" lay-id="11">sql</li>
+                        <li lay-id="55">url</li>
+                    </ul>
+                    <div class="layui-tab-content">
+                        <div class="layui-tab-item layui-show">
+                            <table class="layui-table"
+                                   id="sql-table">
+                            </table>
+                        </div>
+                        <div class="layui-tab-item">
+                            <table class="layui-table"
+                                   id="url-table">
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br><br>
+        </div>
+    </div>
+</div>
+
+<script src="./layui/layui.js"></script>
+<script>
+    //JS
+    layui.use(['element', 'layer', 'util'], function () {
+
+        var sqlUrl = "/druid-extend/sql?serverName=";
+        var webUrl = "/druid-extend/webUrl?serverName=";
+        var dropdown = layui.dropdown;
+        var serverName;
+        var $ = layui.$;
+        $.ajax({
+            url: "allServer", success: function (result) {
+                for (var i = 0; i < result.length; i++) {
+                    $("#sql").append(" <li lay-options=\"{id: 'sql" + result[i].name + "',addr:'" + result[i].ip + ":" + result[i].port + "'}\"><div class=\"layui-menu-body-title\">" + result[i].name + "</div></li>")
+                    if (i == 0) {
+                        serverName = result[i].name;
+                        $("#name").html(serverName);
+                        sqlTable.reload({url: sqlUrl + serverName});
+                        var addr = "http://" + result[i].ip + ":" + result[i].port + "/druid/datasource.html";
+                        $("#address").attr("href", addr);
+                        $("#address").html(addr);
+                    }
+
+                }
+            }
+        });
+        dropdown.on('click(demo-menu)', function (options) {
+            $("#name").html(options.title);
+            serverName = options.title;
+            sqlTable.reload({url: sqlUrl + serverName});
+            var addr = "http://" + options.addr + "/druid/datasource.html";
+            $("#address").attr("href", addr);
+            $("#address").html(addr);
+        });
+        var table = layui.table;
+
+        // 渲染，并获得实例对象
+        var sqlTable = table.render({
+            elem: '#sql-table', // 绑定元素选择器
+            response: {
+                statusCode: 1 // 重新规定成功的状态码为 200，table 组件默认为 0
+            },
+            // 将原始数据解析成 table 组件所规定的数据格式
+            parseData: function (res) {
+                return {
+                    "code": res.length > 0 ? 1 : 0, //解析接口状态
+                    "data": res //解析数据列表
+                };
+            },
+            cols: [[
+                {field: 'id', title: 'ID', width: 80, fixed: 'left', unresize: true, sort: true},
+                {field: 'sql', title: 'sql', width: 500},
+                {field: 'executeCount', title: '执行数'},
+                {field: 'executeMillisTotal', title: '执行时间', sort: true},
+                {field: 'executeMillisMax', title: '最慢', sort: true},
+                {field: 'inTransactionCount', title: '事务执行', sort: true},
+                {field: 'executeErrorCount', title: '错误数', sort: true},
+                {field: 'updateCount', title: '更新行数', sort: true},
+                {field: 'fetchRowCount', title: '读取行数', sort: true},
+                {field: 'runningCount', title: '执行中', sort: true},
+                {field: 'concurrentMax', title: '最大并发', sort: true},
+            ]],
+        });
+
+        // 渲染，并获得实例对象
+        var urlTable = table.render({
+            elem: '#url-table', // 绑定元素选择器
+            response: {
+                statusCode: 1 // 重新规定成功的状态码为 200，table 组件默认为 0
+            },
+            // 将原始数据解析成 table 组件所规定的数据格式
+            parseData: function (res) {
+                return {
+                    "code": res.ResultCode, //解析接口状态
+                    "data": res.Content //解析数据列表
+                };
+            },
+            cols: [[
+                {field: 'URI', title: 'URL', width: 300, sort: true},
+                {field: 'RequestCount', title: '请求次数', sort: true},
+                {field: 'RequestTimeMillis', title: '请求时间（和）', sort: true},
+                {field: 'RequestTimeMillisMax', title: '请求最慢（单次）', sort: true},
+                {field: 'RunningCount', title: '执行中', sort: true},
+                {field: 'ConcurrentMax', title: '最大并发', sort: true},
+                {field: 'JdbcExecuteCount', title: 'Jdbc执行数', sort: true},
+                {field: 'JdbcExecuteErrorCount', title: 'Jdbc出错数', sort: true},
+                {field: 'JdbcExecuteTimeMillis', title: 'Jdbc时间', sort: true},
+                {field: 'JdbcCommitCount', title: '事务提交数', sort: true},
+                {field: 'JdbcRollbackCount', title: '事务回滚数', sort: true},
+                {field: 'JdbcFetchRowCount', title: '读取行数', sort: true},
+                {field: 'JdbcUpdateCount', title: '更新行数', sort: true}
+            ]]
+        });
+
+        var element = layui.element;
+        // tab 切换事件
+        element.on('tab(filter)', function (data) {
+            console.log(serverName)
+            if (data.index == 0) {
+                sqlTable.reload({url: sqlUrl + serverName});
+            } else {
+                urlTable.reload({url: webUrl + serverName});
+            }
+        });
+
+
+    });
+
+</script>
+</body>
+</html>
