@@ -7,6 +7,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="./layui/css/layui.css" rel="stylesheet">
+    <style>
+        #address a {
+            float: left;
+            color: #1e9fff;
+            width: 300px;
+        }
+
+        button {
+            margin: 10px;
+        }
+    </style>
 </head>
 <body>
 <div class="layui-layout layui-layout-admin">
@@ -17,8 +28,16 @@
                 <label class="layui-form-label">服务名：</label>
                 <label id="name" style="color :#1e9fff" class="layui-form-label"></label>
                 <label class="layui-form-label">druid地址：</label>
-                <label class="layui-form-label"><a style="color :#1e9fff" id="address"></a></label>
+                <div id="address" class="layui-form-label"></div>
             </div>
+        </div>
+        <div class="layui-layout-right">
+            <button type="button" id="clearOne" class="layui-btn layui-btn-xs layui-btn-primary layui-border-orange">
+                清除当前服务数据
+            </button>
+            <button type="button" id="clearAll" class="layui-btn layui-btn-xs layui-btn-primary layui-border-orange ">
+                清除所有服务一天前数据
+            </button>
         </div>
     </div>
 
@@ -78,20 +97,21 @@
         var webUrl = "/druid-extend/webUrl?serverName=";
         var dropdown = layui.dropdown;
         var serverName;
+        var serverResult;
         var $ = layui.$;
         $.ajax({
             url: "allServer", success: function (result) {
-                for (var i = 0; i < result.length; i++) {
-                    $("#sql").append(" <li lay-options=\"{id: 'sql" + result[i].name + "',addr:'" + result[i].ip + ":" + result[i].port + "'}\"><div class=\"layui-menu-body-title\">" + result[i].name + "</div></li>")
-                    if (i == 0) {
-                        serverName = result[i].name;
-                        $("#name").html(serverName);
-                        sqlTable.reload({url: sqlUrl + serverName});
-                        var addr = "http://" + result[i].ip + ":" + result[i].port + "/druid/datasource.html";
-                        $("#address").attr("href", addr);
-                        $("#address").html(addr);
-                    }
-
+                for (var name of Object.keys(result)) {
+                    $("#sql").append(" <li lay-options=\"{id: 'sql" + name + "}\"><div class=\"layui-menu-body-title\">" + name + "</div></li>")
+                }
+                serverResult = result;
+                serverName = Object.keys(result)[0];
+                $("#name").html(serverName);
+                sqlTable.reload({url: sqlUrl + serverName});
+                $("#address").html("");
+                for (var one of result[serverName]) {
+                    var addr = "http://" + one.ip + ":" + one.port + "/druid/datasource.html";
+                    $("#address").append("<a href =\"" + addr + "\"  > " + addr);
                 }
             }
         });
@@ -99,10 +119,22 @@
             $("#name").html(options.title);
             serverName = options.title;
             sqlTable.reload({url: sqlUrl + serverName});
-            var addr = "http://" + options.addr + "/druid/datasource.html";
-            $("#address").attr("href", addr);
-            $("#address").html(addr);
+            $("#address").html("");
+            for (var one of serverResult[serverName]) {
+                var addr = "http://" + one.ip + ":" + one.port + "/druid/datasource.html";
+                $("#address").append("<a href =\"" + addr + "\"  > " + addr);
+            }
         });
+        $("#clearOne").click(function () {
+            $.ajax({
+                url: "clearOne?name" + serverName
+            });
+        })
+        $("#clearAll").click(function () {
+            $.ajax({
+                url: "clearOld"
+            });
+        })
         var table = layui.table;
 
         // 渲染，并获得实例对象
@@ -114,22 +146,22 @@
             // 将原始数据解析成 table 组件所规定的数据格式
             parseData: function (res) {
                 return {
-                    "code": res.length > 0 ? 1 : 0, //解析接口状态
-                    "data": res //解析数据列表
+                    "code": res.ResultCode, //解析接口状态
+                    "data": res.Content //解析数据列表
                 };
             },
             cols: [[
                 {field: 'id', title: 'ID', width: 80, fixed: 'left', unresize: true, sort: true},
-                {field: 'sql', title: 'sql', width: 500},
-                {field: 'executeCount', title: '执行数'},
-                {field: 'executeMillisTotal', title: '执行时间', sort: true},
-                {field: 'executeMillisMax', title: '最慢', sort: true},
-                {field: 'inTransactionCount', title: '事务执行', sort: true},
-                {field: 'executeErrorCount', title: '错误数', sort: true},
-                {field: 'updateCount', title: '更新行数', sort: true},
-                {field: 'fetchRowCount', title: '读取行数', sort: true},
-                {field: 'runningCount', title: '执行中', sort: true},
-                {field: 'concurrentMax', title: '最大并发', sort: true},
+                {field: 'SQL', title: 'SQL', width: 500},
+                {field: 'ExecuteCount', title: '执行数'},
+                {field: 'TotalTime', title: '执行时间', sort: true},//executeMillisTotal
+                {field: 'MaxTimespan', title: '最慢', sort: true},//executeMillisMax
+                {field: 'InTransactionCount', title: '事务执行', sort: true},
+                {field: 'ErrorCount', title: '错误数', sort: true},//executeErrorCount
+                {field: 'EffectedRowCount', title: '更新行数', sort: true},//updateCount
+                {field: 'FetchRowCount', title: '读取行数', sort: true},
+                {field: 'RunningCount', title: '执行中', sort: true},
+                {field: 'ConcurrentMax', title: '最大并发', sort: true},
             ]],
         });
 

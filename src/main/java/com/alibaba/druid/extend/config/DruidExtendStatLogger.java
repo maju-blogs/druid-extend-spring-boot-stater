@@ -2,6 +2,7 @@ package com.alibaba.druid.extend.config;
 
 import com.alibaba.druid.extend.properties.ServerInfoProperties;
 import com.alibaba.druid.extend.properties.SqlDto;
+import com.alibaba.druid.extend.util.DateUtil;
 import com.alibaba.druid.pool.DruidDataSourceStatLogger;
 import com.alibaba.druid.pool.DruidDataSourceStatLoggerImpl;
 import com.alibaba.druid.pool.DruidDataSourceStatValue;
@@ -9,6 +10,7 @@ import com.alibaba.druid.stat.DruidStatService;
 import com.alibaba.druid.stat.JdbcSqlStatValue;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
@@ -22,18 +24,20 @@ public class DruidExtendStatLogger extends DruidDataSourceStatLoggerImpl impleme
 
     private static ServerInfoProperties serverInfoProperties;
 
-    private DruidStatService druidStatService = DruidStatService.getInstance();
+    private DruidStatService druidStatService;
+    private RedisDruidCache redisDruidCache = RedisDruidCacheConfig.getInstance();
 
     private static final String NOT_COUNT_SQL = "SELECT 1 FROM DUAL|/\\* ping \\*/ SELECT 1";
-    ServerInfoProperties infoProperties;
-
-    private Date lastClearDate = new Date();
-
-    private long clear = 24 * 60 * 60 * 1000;
 
     @Override
     public void log(DruidDataSourceStatValue statValue) {
         try {
+            if (null == druidStatService) {
+                druidStatService = DruidStatService.getInstance();
+            }
+            if (null == redisDruidCache) {
+                redisDruidCache = RedisDruidCacheConfig.getInstance();
+            }
             String appName = "";
             if (null != serverInfoProperties) {
                 appName = serverInfoProperties.getName();
@@ -50,37 +54,25 @@ public class DruidExtendStatLogger extends DruidDataSourceStatLoggerImpl impleme
                 for (JdbcSqlStatValue value : jdbcSqlStatValueStream) {
                     SqlDto dto = new SqlDto();
                     dto.setId(value.getId());
-                    dto.setSql(value.getSql());
+                    dto.setSQL(value.getSql());
                     dto.setSqlMD5(DigestUtils.md5DigestAsHex(value.getSql().getBytes()));
                     dto.setExecuteCount(value.getExecuteCount());
-                    dto.setExecuteMillisTotal(value.getExecuteMillisTotal());
-                    dto.setExecuteMillisMax(value.getExecuteMillisMax());
+                    dto.setTotalTime(value.getExecuteMillisTotal());
+                    dto.setMaxTimespan(value.getExecuteMillisMax());
                     dto.setInTransactionCount(value.getInTransactionCount());
-                    dto.setExecuteErrorCount(value.getExecuteErrorCount());
-                    dto.setUpdateCount(value.getUpdateCount());
+                    dto.setErrorCount(value.getExecuteErrorCount());
+                    dto.setEffectedRowCount(value.getUpdateCount());
                     dto.setFetchRowCount(value.getFetchRowCount());
                     dto.setRunningCount(value.getRunningCount());
                     dto.setConcurrentMax(value.getConcurrentMax());
                     array.add(dto);
                 }
-
-                if (null != serverInfoProperties.getRedisDruidCache()) {
-                    serverInfoProperties.getRedisDruidCache().putLogger(appName + ":SQL", JSON.toJSONString(array));
-                    serverInfoProperties.getRedisDruidCache().putLogger(appName + ":URI", weburi);
-                    if (null == infoProperties) {
-                        infoProperties = new ServerInfoProperties();
-                        infoProperties.setIp(serverInfoProperties.getIp());
-                        infoProperties.setName(serverInfoProperties.getName());
-                        infoProperties.setPort(serverInfoProperties.getPort());
-                        infoProperties.setRedisDruidCache(null);
-                        serverInfoProperties.getRedisDruidCache().putServerInfo(appName, JSON.toJSONString(infoProperties));
-                    }
-
+                JSONObject SQL = new JSONObject();
+                SQL.put("Content", array);
+                SQL.put("ResultCode", 1);
+                if (null != redisDruidCache) {
+                    redisDruidCache.putLogger(appName + ":SQL", DateUtil.formatDateTime(new Date()), JSON.toJSONString(SQL));
                 }
-            }
-            Date now = new Date();
-            if (now.getTime() - lastClearDate.getTime() > clear) {
-                serverInfoProperties.getRedisDruidCache().clearAll();
             }
         } catch (Exception e) {
             log.warn("logDruidStatException", e.getMessage());

@@ -11,7 +11,7 @@ import java.util.Map;
 
 @Component
 public class RedisDruidCacheConfig implements InitializingBean, ApplicationContextAware {
-    private Map<String, RedisDruidCache> queryServiceImplMap = new HashMap<>();
+    private static Map<String, RedisDruidCache> queryServiceImplMap = new HashMap<>();
     private ApplicationContext applicationContext;
 
     @Override
@@ -27,12 +27,16 @@ public class RedisDruidCacheConfig implements InitializingBean, ApplicationConte
         this.applicationContext = applicationContext;
     }
 
-    public RedisDruidCache getRedisDruidCache(){
-        for(Map.Entry<String, RedisDruidCache> entry: queryServiceImplMap.entrySet()){
-            if(!entry.getKey().equals("redisDruidCacheImpl")){
+    public static RedisDruidCache getInstance() {
+        for (Map.Entry<String, RedisDruidCache> entry : queryServiceImplMap.entrySet()) {
+            if (!entry.getKey().equals("redisDruidCache")) {
                 return entry.getValue();
             }
         }
-        return queryServiceImplMap.get("redisDruidCacheImpl");
+        return queryServiceImplMap.get("redisDruidCache");
+    }
+
+    public static void setInstance(RedisDruidCache redisDruidCache) {
+        queryServiceImplMap.put("redisDruidCacheImpl", redisDruidCache);
     }
 }

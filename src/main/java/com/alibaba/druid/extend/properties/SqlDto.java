@@ -1,31 +1,30 @@
 package com.alibaba.druid.extend.properties;
 
-
 import lombok.Data;
 
 @Data
 public class SqlDto {
-    private long updateCount;
+    private long EffectedRowCount;
 
-    private long concurrentMax;
+    private long ConcurrentMax;
 
-    private long executeMillisTotal;
+    private long TotalTime;
 
-    private long inTransactionCount;
+    private long InTransactionCount;
 
     private String sqlMD5;
 
-    private long fetchRowCount;
+    private long FetchRowCount;
 
-    private long runningCount;
+    private long RunningCount;
 
     private long id;
 
-    private long executeErrorCount;
+    private long ErrorCount;
 
-    private long executeCount;
+    private long ExecuteCount;
 
-    private long executeMillisMax;
+    private long MaxTimespan;
 
-    private String sql;
+    private String SQL;
 }
