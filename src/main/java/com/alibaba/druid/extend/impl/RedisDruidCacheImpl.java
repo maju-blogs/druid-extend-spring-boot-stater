@@ -5,11 +5,14 @@ import com.alibaba.druid.extend.properties.ServerInfoProperties;
 import com.alibaba.druid.extend.properties.SqlDto;
 import com.alibaba.druid.extend.properties.UrlDto;
 import com.alibaba.druid.extend.util.DateUtil;
+import com.alibaba.druid.stat.DruidStatService;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import java.util.*;
@@ -23,6 +26,11 @@ public class RedisDruidCacheImpl implements RedisDruidCache {
 
     @Resource
     private ServerInfoProperties serverInfoProperties;
+
+    private DruidStatService druidStatService;
+
+    String startTime = DateUtil.formatDateTime(new Date());
+
 
     @Override
     public void putServerInfo(String key, String value) {
@@ -112,7 +120,7 @@ public class RedisDruidCacheImpl implements RedisDruidCache {
                 sqlDto.setConcurrentMax(entry.getValue().stream().mapToLong(SqlDto::getConcurrentMax).max().getAsLong());
                 sqlDto.setEffectedRowCount(entry.getValue().stream().mapToLong(SqlDto::getEffectedRowCount).sum());
                 sqlDto.setTotalTime(entry.getValue().stream().mapToLong(SqlDto::getTotalTime).sum());
-                sqlDto.setInTransactionCount(entry.getValue().stream().mapToLong(SqlDto::getTotalTime).sum());
+                sqlDto.setInTransactionCount(entry.getValue().stream().mapToLong(SqlDto::getInTransactionCount).sum());
                 sqlDto.setFetchRowCount(entry.getValue().stream().mapToLong(SqlDto::getFetchRowCount).sum());
                 sqlDto.setRunningCount(entry.getValue().stream().findFirst().get().getRunningCount());
                 sqlDto.setId(entry.getValue().stream().findFirst().get().getId());
@@ -169,5 +177,35 @@ public class RedisDruidCacheImpl implements RedisDruidCache {
     @Override
     public boolean hasServer(String name) {
         return redisTemplate.hasKey(RedisDruidCache.SERVER_NAME + name);
+    }
+
+    @Override
+    public void pullData() {
+        if (null == druidStatService) {
+            druidStatService = DruidStatService.getInstance();
+        }
+        String weburi = druidStatService.service("/weburi.json");
+        String sql = druidStatService.service("/sql.json");
+        if (weburi.length() > 50) {
+            this.putLogger(serverInfoProperties.getName() + ":URI", startTime, weburi);
+        }
+        if (sql.length() > 50) {
+            JSONObject object = JSONObject.parseObject(sql);
+            JSONArray array = object.getJSONArray("Content");
+            if (null != array && array.size() > 0) {
+                for (int i = 0; i < array.size(); i++) {
+                    JSONObject obj = array.getJSONObject(i);
+                    if (null != obj.get("SQL")) {
+                        obj.put("sqlMD5", DigestUtils.md5DigestAsHex(obj.getString("SQL").getBytes()));
+                    }
+                }
+            }
+            this.putLogger(serverInfoProperties.getName() + ":SQL", startTime, object.toString());
+        }
+    }
+
+    @Override
+    public void clearSql(String key) {
+        redisTemplate.opsForHash().delete(RedisDruidCache.SERVER_DATA + key + ":SQL", startTime);
     }
 }

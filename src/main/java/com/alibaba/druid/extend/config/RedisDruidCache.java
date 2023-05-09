@@ -29,4 +29,8 @@ public interface RedisDruidCache {
     List<UrlDto>  getWebUriByServerName(String serverName);
 
     boolean hasServer(String name);
+
+    void pullData();
+
+    void clearSql(String key);
 }

@@ -74,4 +74,11 @@ public class DruidController {
         Map<String, List<ServerInfoProperties>> allServeInfo = redisDruidCacheConfig.getInstance().getAllServeInfo();
         return ResponseEntity.ok(allServeInfo);
     }
+
+    @ResponseBody
+    @RequestMapping("pullData")
+    public ResponseEntity<String> pullData() {
+        redisDruidCacheConfig.getInstance().pullData();
+        return ResponseEntity.ok().build();
+    }
 }

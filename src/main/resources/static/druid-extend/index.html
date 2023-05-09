@@ -32,6 +32,9 @@
             </div>
         </div>
         <div class="layui-layout-right">
+            <button type="button" id="pullData" class="layui-btn layui-btn-xs layui-btn-primary layui-border-blue">
+                同步数据
+            </button>
             <button type="button" id="clearOne" class="layui-btn layui-btn-xs layui-btn-primary layui-border-orange">
                 清除当前服务数据
             </button>
@@ -127,7 +130,15 @@
         });
         $("#clearOne").click(function () {
             $.ajax({
-                url: "clearOne?name" + serverName
+                url: "clearOne?name=" + serverName
+            });
+        })
+        $("#pullData").click(function () {
+            $.ajax({
+                url: "pullData",
+                success: function () {
+                    sqlTable.reload({url: sqlUrl + serverName});
+                }
             });
         })
         $("#clearAll").click(function () {

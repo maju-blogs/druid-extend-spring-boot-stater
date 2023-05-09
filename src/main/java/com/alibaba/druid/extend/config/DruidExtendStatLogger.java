@@ -72,6 +72,7 @@ public class DruidExtendStatLogger extends DruidDataSourceStatLoggerImpl impleme
                 SQL.put("ResultCode", 1);
                 if (null != redisDruidCache) {
                     redisDruidCache.putLogger(appName + ":SQL", DateUtil.formatDateTime(new Date()), JSON.toJSONString(SQL));
+                    redisDruidCache.clearSql(appName);
                 }
             }
         } catch (Exception e) {
