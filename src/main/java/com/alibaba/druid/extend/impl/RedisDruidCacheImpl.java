@@ -39,7 +39,7 @@ public class RedisDruidCacheImpl implements RedisDruidCache {
 
     @Override
     public void putLogger(String key, String dateKey, String value) {
-        redisTemplate.opsForHash().put(RedisDruidCache.SERVER_DATA + key, dateKey + "_" + serverInfoProperties.getNumber(), value);
+        redisTemplate.opsForHash().put(RedisDruidCache.SERVER_DATA + key, dateKey + "_" + serverInfoProperties.getIp(), value);
     }
 
     @Override

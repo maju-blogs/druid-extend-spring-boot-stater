@@ -49,7 +49,6 @@ public class PullDataExecuter {
             infoProperties.setIp(getIP());
             infoProperties.setName(serverInfoProperties.getName());
             infoProperties.setPort(serverInfoProperties.getPort());
-            infoProperties.setNumber(null);
             redisDruidCache.putServerInfo(serverInfoProperties.getName(), JSON.toJSONString(infoProperties));
         }
     }

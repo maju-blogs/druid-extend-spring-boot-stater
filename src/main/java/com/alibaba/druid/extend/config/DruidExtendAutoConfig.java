@@ -18,12 +18,22 @@ public class DruidExtendAutoConfig {
 
     DruidExtendAutoConfig(ServerInfoProperties serverInfoProperties) {
         try {
+            serverInfoProperties.setIp(getIP());
             DruidExtendStatLogger.setServerInfo(serverInfoProperties);
             log.info("Druid Extend Init...");
         } catch (IllegalArgumentException e) {
             log.error("redisTemplate can not null");
         }
 
+    }
+
+    public String getIP() {
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            log.warn("get ip error");
+        }
+        return "";
     }
 
 }

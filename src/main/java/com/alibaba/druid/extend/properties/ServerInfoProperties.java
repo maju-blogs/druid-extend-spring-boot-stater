@@ -15,7 +15,6 @@ public class ServerInfoProperties {
     @Value("${spring.application.name}")
     private String name;
     private String port;
-    private String number = getCPUSerialNumber();
     private String ip;
     @Value("${spring.datasource.druid.maxSaveTime:86400000}")
     private long maxSaveTime;
