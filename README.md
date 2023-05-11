@@ -13,7 +13,7 @@
         <dependency>
             <groupId>com.alibaba.druid.extend</groupId>
             <artifactId>druid-extend-spring-boot-stater</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.2</version>
         </dependency>
 
         <dependency>
