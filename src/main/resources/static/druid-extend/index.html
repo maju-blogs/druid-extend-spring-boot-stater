@@ -100,6 +100,7 @@
         var webUrl = "/druid-extend/webUrl?serverName=";
         var dropdown = layui.dropdown;
         var serverName;
+        var tab = 0;
         var serverResult;
         var $ = layui.$;
         $.ajax({
@@ -121,7 +122,12 @@
         dropdown.on('click(demo-menu)', function (options) {
             $("#name").html(options.title);
             serverName = options.title;
-            sqlTable.reload({url: sqlUrl + serverName});
+            if(tab == 1){
+                urlTable.reload({url: webUrl + serverName});
+
+            }else {
+                sqlTable.reload({url: sqlUrl + serverName});
+            }
             $("#address").html("");
             for (var one of serverResult[serverName]) {
                 var addr = "http://" + one.ip + ":" + one.port + "/druid/datasource.html";
@@ -138,6 +144,7 @@
                 url: "pullData",
                 success: function () {
                     sqlTable.reload({url: sqlUrl + serverName});
+                    urlTable.reload({url: webUrl + serverName});
                 }
             });
         })
@@ -211,8 +218,10 @@
         element.on('tab(filter)', function (data) {
             console.log(serverName)
             if (data.index == 0) {
+                tab = 0;
                 sqlTable.reload({url: sqlUrl + serverName});
             } else {
+                tab = 1;
                 urlTable.reload({url: webUrl + serverName});
             }
         });
