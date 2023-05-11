@@ -90,10 +90,24 @@
     <!--项目在github或其它托管平台的地址-->
     <scm>
         <connection>https://github.com/maju-blogs/druid-extend-spring-boot-stater.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:blogs/druid-extend-spring-boot-stater.git
+        <developerConnection>scm:git:ssh://git@github.com:maju-blogs/druid-extend-spring-boot-stater.git
         </developerConnection>
         <url>https://github.com/maju-blogs/druid-extend-spring-boot-stater/tree/master</url>
     </scm>
+
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+
 
     <build>
         <plugins>
