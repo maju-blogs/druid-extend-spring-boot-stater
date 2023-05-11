@@ -64,6 +64,6 @@ public class PullDataExecuter {
 
     @Scheduled(cron = "0 0 * * * ?")
     public void clearOld() {
-        redisDruidCache.clearOld();
+        redisDruidCache.clearOld(null);
     }
 }

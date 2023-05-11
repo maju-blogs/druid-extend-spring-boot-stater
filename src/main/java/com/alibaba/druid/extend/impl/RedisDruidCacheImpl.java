@@ -77,9 +77,12 @@ public class RedisDruidCacheImpl implements RedisDruidCache {
     }
 
     @Override
-    public void clearOld() {
+    public void clearOld(Integer time) {
         Set<String> keys = redisTemplate.keys(RedisDruidCache.SERVER_DATA + "*");
         long maxSaveTime = serverInfoProperties.getMaxSaveTime();
+        if(null != time){
+            maxSaveTime = time * 60 *1000;
+        }
         Date date = new Date();
         for (String key : keys) {
 

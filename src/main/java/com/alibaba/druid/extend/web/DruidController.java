@@ -53,8 +53,8 @@ public class DruidController {
 
     @ResponseBody
     @RequestMapping("clearOld")
-    public ResponseEntity<String> clearOld() {
-        redisDruidCacheConfig.getInstance().clearOld();
+    public ResponseEntity<String> clearOld(Integer time) {
+        redisDruidCacheConfig.getInstance().clearOld(time);
         return ResponseEntity.ok("Clear old data successfully");
     }
 

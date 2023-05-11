@@ -35,12 +35,19 @@
             <button type="button" id="pullData" class="layui-btn layui-btn-xs layui-btn-primary layui-border-blue">
                 同步数据
             </button>
-            <button type="button" id="clearOne" class="layui-btn layui-btn-xs layui-btn-primary layui-border-orange">
-                清除当前服务数据
+            <button type="button" id="clearOne" class="layui-btn layui-btn-xs layui-btn-primary layui-border-blue">
+                清除服务数据
             </button>
             <button type="button" id="clearAll" class="layui-btn layui-btn-xs layui-btn-primary layui-border-orange ">
-                清除所有服务一天前数据
+                清除旧数据
             </button>
+            <select class="layui-border-orange" id="clearTime" name="clearTime">
+                <option value="30" selected>30分钟</option>
+                <option value="60">1小时</option>
+                <option value="120">2小时</option>
+                <option value="300">5小时</option>
+                <option value="720">12小时</option>
+            </select>
         </div>
     </div>
 
@@ -150,7 +157,7 @@
         })
         $("#clearAll").click(function () {
             $.ajax({
-                url: "clearOld"
+                url: "clearOld?time="+$("#clearTime option:selected").val()
             });
         })
         var table = layui.table;

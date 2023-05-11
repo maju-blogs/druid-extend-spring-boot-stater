@@ -22,7 +22,7 @@ public interface RedisDruidCache {
 
     void clearAll();
 
-    void clearOld();
+    void clearOld(Integer time);
 
     List<SqlDto> getSqlByServerName(String serverName);
 
