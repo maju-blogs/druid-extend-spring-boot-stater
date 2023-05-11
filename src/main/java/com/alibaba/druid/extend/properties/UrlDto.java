@@ -7,7 +7,6 @@ public class UrlDto {
     private String URI;
     private long RequestCount;
     private long RequestTimeMillis;
-    private long RequestTimeMillisMax;
     private long RunningCount;
     private long ConcurrentMax;
     private long JdbcExecuteCount;

@@ -156,7 +156,6 @@ public class RedisDruidCacheImpl implements RedisDruidCache {
                 sqlDto.setURI(entry.getValue().stream().findFirst().get().getURI());
                 sqlDto.setRequestCount(entry.getValue().stream().mapToLong(UrlDto::getRequestCount).sum());
                 sqlDto.setRequestTimeMillis(entry.getValue().stream().mapToLong(UrlDto::getRequestTimeMillis).sum());
-                sqlDto.setRequestTimeMillisMax(entry.getValue().stream().mapToLong(UrlDto::getRequestTimeMillisMax).max().getAsLong());
                 sqlDto.setRunningCount(entry.getValue().stream().findFirst().get().getRunningCount());
                 sqlDto.setConcurrentMax(entry.getValue().stream().mapToLong(UrlDto::getConcurrentMax).max().getAsLong());
                 sqlDto.setJdbcExecuteCount(entry.getValue().stream().mapToLong(UrlDto::getJdbcExecuteCount).sum());
