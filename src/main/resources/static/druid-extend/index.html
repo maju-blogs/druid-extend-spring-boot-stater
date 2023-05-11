@@ -26,7 +26,7 @@
         <div class="layui-layout-left">
             <div class="layui-form-item">
                 <label class="layui-form-label">服务名：</label>
-                <label id="name" style="color :#1e9fff" class="layui-form-label"></label>
+                <label id="name" style="width: 120px ; color :#1e9fff" class="layui-form-label"></label>
                 <label class="layui-form-label">druid地址：</label>
                 <div id="address" class="layui-form-label"></div>
             </div>
@@ -122,10 +122,10 @@
         dropdown.on('click(demo-menu)', function (options) {
             $("#name").html(options.title);
             serverName = options.title;
-            if(tab == 1){
+            if (tab == 1) {
                 urlTable.reload({url: webUrl + serverName});
 
-            }else {
+            } else {
                 sqlTable.reload({url: sqlUrl + serverName});
             }
             $("#address").html("");
