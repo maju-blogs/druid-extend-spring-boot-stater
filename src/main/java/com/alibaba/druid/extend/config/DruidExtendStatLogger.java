@@ -11,6 +11,7 @@ import com.alibaba.druid.stat.JdbcSqlStatValue;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONWriter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
@@ -48,7 +49,7 @@ public class DruidExtendStatLogger extends DruidDataSourceStatLoggerImpl impleme
                     return;
                 }
                 String weburi = druidStatService.service("/weburi.json");
-                log.debug("DRUID_SQL_STAT_LOGGER:APP:{},{}", appName, jdbcSqlStatValueStream);
+                log.debug("DRUID_SQL_STAT_LOGGER:APP:{},{}", appName, JSON.toJSONString(jdbcSqlStatValueStream, JSONWriter.Feature.FieldBased));
                 log.debug("DRUID_URI_STAT_LOGGER:APP:{},{}", appName, weburi);
                 JSONArray array = new JSONArray();
                 for (JdbcSqlStatValue value : jdbcSqlStatValueStream) {
